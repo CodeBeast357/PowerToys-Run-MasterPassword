@@ -1,0 +1,14 @@
+{
+  "ID": "B412945C22F5425CB337FE8AFF21E5A4",
+  "Disabled": false,
+  "ActionKeyword": "[",
+  "Name": "TOTP",
+  "Author": "Zapic",
+  "Version": "1.2.1",
+  "Language": "csharp",
+  "Website": "https://github.com/KawaiiZapic/PowerToysRunTOTP",
+  "ExecuteFileName": "PowerToysRunTOTP.dll",
+  "IsGlobal": false,
+  "IcoPathDark": "images\\icon-dark.png",
+  "IcoPathLight": "images\\icon-light.png"
+}
