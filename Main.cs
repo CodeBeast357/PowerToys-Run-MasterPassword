@@ -43,13 +43,14 @@ public class Main : IPlugin, IPluginI18n, ISettingProvider
         if (_passwordBuilder == null)
         {
             var userSecret = query.Search.ToCharArray();
-            _passwordBuilder = new(_settings.Username, _settings.AlgorithmVersion, ref userSecret);
+            _passwordBuilder = PasswordListGenerator.Create(_settings.AlgorithmVersion, _settings.Username, ref userSecret);
 
             return [];
         }
 
         var siteName = query.Search;
-        var resultPasswords = _passwordBuilder.Generate(siteName).Select((item, index) => new Result
+        var passwordList = _passwordBuilder.GenerateList(siteName);
+        var resultPasswords = passwordList.Select((item, index) => new Result
         {
             Title = item,
             SubTitle = string.Format(Resources.Counter, index),

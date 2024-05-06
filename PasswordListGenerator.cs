@@ -1,38 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace PowerToysRunMasterPassword
+namespace PowerToysRunMasterPassword;
+
+internal class PasswordListGenerator
 {
-    internal class PasswordListGenerator
+    private readonly IPasswordAlgorithm _passwordAlgorithm;
+
+    private readonly byte[] _userKey;
+
+    private readonly byte[] _userSecret;
+
+    private PasswordListGenerator(IPasswordAlgorithm passwordAlgorithm, byte[] userKey, byte[] userSecret)
     {
-        private readonly string _userName;
 
-        private readonly AlgorithmVersion _algorithmVersion;
+        _userKey = userKey;
+        _passwordAlgorithm = passwordAlgorithm;
+        _userSecret = userSecret;
+    }
 
-        private readonly byte[] _userKey;
+    ~PasswordListGenerator()
+    {
+        Array.Fill(_userSecret, byte.MinValue);
+    }
 
-        public PasswordListGenerator(string userName, AlgorithmVersion algorithmVersion, ref char[] userSecret)
+    public static PasswordListGenerator Create(AlgorithmVersion algorithmVersion, string userName, ref char[] userPassword)
+    {
+        var passwordAlgorithm = PasswordAlgorithmFactory.Provide(algorithmVersion);
+        var userSecret = System.Text.Encoding.UTF8.GetBytes(userPassword);
+        Array.Fill(userPassword, char.MinValue);
+        var userKey = passwordAlgorithm.CreateUserKey(userName, userSecret);
+        return new PasswordListGenerator(passwordAlgorithm, userKey, userSecret);
+    }
+
+    public System.Collections.Generic.IEnumerable<string> GenerateList(string siteName)
+    {
+        for (var siteCounter = (byte)1; siteCounter < byte.MaxValue; siteCounter++)
         {
-
-            _userName = userName;
-            _algorithmVersion = algorithmVersion;
-            _userKey = CreateUserKey(_algorithmVersion, ref userSecret);
-        }
-
-        ~PasswordListGenerator()
-        {
-            Array.Fill(_userKey, byte.MinValue);
-        }
-
-        static byte[] CreateUserKey(AlgorithmVersion algorithmVersion, ref char[] userSecret)
-        {
-            Array.Fill(userSecret, char.MinValue);
-            return new[] { byte.MinValue };
-        }
-
-        public IEnumerable<string> Generate(string siteName)
-        {
-            yield break;
+            yield return _passwordAlgorithm.GeneratePassword(_userSecret, siteName, siteCounter);
         }
     }
 }
